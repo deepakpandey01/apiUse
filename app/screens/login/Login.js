@@ -16,7 +16,6 @@ function Login(props){
           const value = await AsyncStorage.getItem('token_id');
           if(value !== null) {
             props.navigation.navigate("Home");
-            console.log(value);
           }
         } catch(e) {
           console.log(e);
@@ -25,14 +24,27 @@ function Login(props){
   
     }, [])
 
-    function btnHandler() {
+
+    const setItem = async(response) =>{
+      // response.data.authenticationResult.idToken
+      const jsonValue = JSON.stringify("Bearer "+response.data.authenticationResult.idToken)
+        try {
+          await AsyncStorage.setItem('token_id', response.data.authenticationResult.idToken)
+        } catch (e) {
+          // saving error
+        }
+    }
+
+    const btnHandler =async() => {
       axios.post('http://dev-api.kayanhealth.com/v1/app/1/Authentication/signin', {
       "email": value,
       "password": pwd
     })
     .then(function (response) {
       if(response.data.authenticationResult){
-        props.Info(response);
+        // axios.defaults.headers.common['Authorization'] = "Bearer " + response.data.authenticationResult.idToken;
+        setItem(response);
+        // props.Info({response});
         props.navigation.navigate("Home");
       }
       else{
